@@ -3,6 +3,9 @@
 
 [forked & modified from LaurentH's original repo: https://github.com/laurenth-personal/lightmap-switching-tool]
 
+[![Alt text](https://img.youtube.com/vi/7lqGM1kvU-0/0.jpg)](https://www.youtube.com/watch?v=7lqGM1kvU-0)
+
+
 Installation
 --------------
 
