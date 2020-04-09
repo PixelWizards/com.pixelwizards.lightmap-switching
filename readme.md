@@ -47,7 +47,7 @@ The system relies on 2 components :
 **LevelLightmapData**
 This is the core container that you need in your scene to references the different lighting scenarios, build the lighting, and stores the dependencies to the lightmaps.
 
-![LevelLightmapData](Documentation~\images\LevelLightmapData.png)
+![LevelLightmapData](Documentation~/images/LevelLightmapData.png)
 
 **LightingScenarioSwitcher**
 This is just an example of asset that calls the LevelLightmapData in order to switch lightmaps at runtime. You could build other components that call the LevelLightmapData in the same way but on different events (like you could use a box trigger running the same script on OnTriggerEnter ).
