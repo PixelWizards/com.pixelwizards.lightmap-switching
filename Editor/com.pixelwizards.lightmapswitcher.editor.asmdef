@@ -1,0 +1,18 @@
+{
+    "name": "com.pixelwizards.lightmapswitcher.editor",
+    "references": [
+        "GUID:478a2357cc57436488a56e564b08d223",
+        "GUID:734f86385bb249258ec486dcca2d93af"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

@@ -1,0 +1,15 @@
+{
+    "name": "com.pixelwizards.lightmapswitcher.samples",
+    "references": [
+        "GUID:734f86385bb249258ec486dcca2d93af"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
