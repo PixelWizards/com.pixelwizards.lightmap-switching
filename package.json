@@ -1,7 +1,7 @@
 {
   "name": "com.pixelwizards.lightmap-switching",
   "displayName": "Lightmap Switcher",
-  "version": "0.1.0-preview.1",
+  "version": "0.1.0-preview.3",
   "unity": "2019.1",
   "description": "Allows you to switch lightmaps at runtime, includes a custom Timeline track to allow for loading light scenarios dynamically",
   "dependencies": {
