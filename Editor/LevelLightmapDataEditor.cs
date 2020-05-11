@@ -30,7 +30,25 @@ namespace PixelWizards.LightmapSwitcher
         public override void OnInspectorGUI()
         {
             serializedObject.Update();
-            LevelLightmapData lightmapData = (LevelLightmapData)target;
+            var lightmapData = (LevelLightmapData)target;
+            GUILayout.Space(5f);
+            GUILayout.Label("Lighting Data Config");
+            GUILayout.Space(5f);
+            lightmapData.config = EditorGUILayout.ObjectField(lightmapData.config, typeof(LightingScenarioConfig), false) as LightingScenarioConfig;
+            if( lightmapData.config == null)
+            {
+                if(GUILayout.Button("Create Config"))
+                {
+                    var lsc = ScriptableObject.CreateInstance(typeof(LightingScenarioConfig));
+                    lsc.name = "LightingScenario Config";
+                    AssetDatabase.CreateAsset(lsc, "Assets/" + lsc.name.Replace(" ", "") + ".asset");
+                    lightmapData.config = lsc as LightingScenarioConfig;
+                    AssetDatabase.SaveAssets();
+                    //EditorUtility.FocusProjectWindow();
+                    //Selection.activeObject = lsc;
+                }
+            }
+            GUILayout.Space(5f);
 
             EditorGUI.BeginChangeCheck();
             EditorGUILayout.PropertyField(lightingScenariosScenes, new GUIContent("Lighting Scenarios Scenes"), includeChildren: true);
@@ -50,14 +68,15 @@ namespace PixelWizards.LightmapSwitcher
 
             serializedObject.ApplyModifiedProperties();
 
-            EditorGUILayout.Space();
+            EditorGUILayout.Space(10f);
 
             for (int i = 0; i < lightmapData.lightingScenariosScenes.Count; i++)
             {
                 EditorGUILayout.BeginHorizontal();
                 if (lightmapData.lightingScenariosScenes[i] != null)
                 {
-                    EditorGUILayout.LabelField(lightmapData.lightingScenariosScenes[i].name.ToString(), EditorStyles.boldLabel);
+                    var sceneName = lightmapData.lightingScenariosScenes[i].name.ToString();
+                    EditorGUILayout.LabelField(sceneName, EditorStyles.boldLabel);
                     if (GUILayout.Button("Build "))
                     {
                         if (UnityEditor.Lightmapping.giWorkflowMode != UnityEditor.Lightmapping.GIWorkflowMode.OnDemand)
@@ -69,7 +88,7 @@ namespace PixelWizards.LightmapSwitcher
                     }
                     if (GUILayout.Button("Store "))
                     {
-                        lightmapData.StoreLightmapInfos(i);
+                        lightmapData.StoreLightmapInfos(i, sceneName);
                     }
                     if (GUILayout.Button("Load "))
                     {
@@ -77,6 +96,14 @@ namespace PixelWizards.LightmapSwitcher
                     }
                 }
                 EditorGUILayout.EndHorizontal();
+            }
+
+            if (GUI.changed)
+            {
+                serializedObject.ApplyModifiedProperties();
+                EditorUtility.SetDirty(lightmapData.config);
+                AssetDatabase.SaveAssets();
+                AssetDatabase.Refresh();
             }
         }
 
