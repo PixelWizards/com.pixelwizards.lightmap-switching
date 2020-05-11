@@ -12,44 +12,42 @@ using UnityEditor;
 
 namespace PixelWizards.LightmapSwitcher
 {
+    [System.Serializable]
+    public class SphericalHarmonics
+    {
+        public float[] coefficients = new float[27];
+    }
 
+    [System.Serializable]
+    public class RendererInfo
+    {
+        public Renderer renderer;
+        public int lightmapIndex;
+        public Vector4 lightmapOffsetScale;
+    }
+
+    [System.Serializable]
+    public class LightingScenarioData
+    {
+        public string sceneName;                // the original source lighting scene that was used to generate this lighting scenario
+        public RendererInfo[] rendererInfos;
+        public Texture2D[] lightmaps;
+        public Texture2D[] lightmapsDir;
+        public Texture2D[] shadowMasks;
+        public LightmapsMode lightmapsMode;
+        public SphericalHarmonics[] lightProbes;
+        public bool hasRealtimeLights;
+    }
 
     [ExecuteInEditMode]
     public class LevelLightmapData : MonoBehaviour
     {
-        [System.Serializable]
-        public class SphericalHarmonics
-        {
-            public float[] coefficients = new float[27];
-        }
-
-        [System.Serializable]
-        public class RendererInfo
-        {
-            public Renderer renderer;
-            public int lightmapIndex;
-            public Vector4 lightmapOffsetScale;
-        }
-
-        [System.Serializable]
-        public class LightingScenarioData
-        {
-            public RendererInfo[] rendererInfos;
-            public Texture2D[] lightmaps;
-            public Texture2D[] lightmapsDir;
-            public Texture2D[] shadowMasks;
-            public LightmapsMode lightmapsMode;
-            public SphericalHarmonics[] lightProbes;
-            public bool hasRealtimeLights;
-        }
-
         public bool latestBuildHasReltimeLights;
         public bool allowLoadingLightingScenes = true;
         [Tooltip("Enable this if you want to use different lightmap resolutions in your different lighting scenarios. In that case you'll have to disable Static Batching in the Player Settings. When disabled, Static Batching can be used but all your lighting scenarios need to use the same lightmap resolution.")]
         public bool applyLightmapScaleAndOffset = true;
 
-        [SerializeField]
-        List<LightingScenarioData> lightingScenariosData = new List<LightingScenarioData>();
+        public LightingScenarioConfig config;
 
 #if UNITY_EDITOR
         [SerializeField]
@@ -88,7 +86,7 @@ namespace PixelWizards.LightmapSwitcher
 
                 currentLightingScenario = index;
 
-                LightmapSettings.lightmapsMode = lightingScenariosData[index].lightmapsMode;
+                LightmapSettings.lightmapsMode = config.lightingScenariosData[index].lightmapsMode;
 
                 if (allowLoadingLightingScenes)
                     m_SwitchSceneCoroutine = StartCoroutine(SwitchSceneCoroutine(lightingScenesNames[previousLightingScenario], lightingScenesNames[currentLightingScenario]));
@@ -97,7 +95,7 @@ namespace PixelWizards.LightmapSwitcher
 
                 if (applyLightmapScaleAndOffset)
                 {
-                    ApplyRendererInfo(lightingScenariosData[index].rendererInfos);
+                    ApplyRendererInfo(config.lightingScenariosData[index].rendererInfos);
                 }
 
                 LightmapSettings.lightmaps = newLightmaps;
@@ -121,9 +119,9 @@ namespace PixelWizards.LightmapSwitcher
 
         private SphericalHarmonicsL2[] DeserializeLightProbes(int index)
         {
-            var sphericalHarmonicsArray = new SphericalHarmonicsL2[lightingScenariosData[index].lightProbes.Length];
+            var sphericalHarmonicsArray = new SphericalHarmonicsL2[config.lightingScenariosData[index].lightProbes.Length];
 
-            for (int i = 0; i < lightingScenariosData[index].lightProbes.Length; i++)
+            for (int i = 0; i < config.lightingScenariosData[index].lightProbes.Length; i++)
             {
                 var sphericalHarmonics = new SphericalHarmonicsL2();
 
@@ -133,7 +131,7 @@ namespace PixelWizards.LightmapSwitcher
                     //k is channel ( r g b )
                     for (int k = 0; k < 9; k++)
                     {
-                        sphericalHarmonics[j, k] = lightingScenariosData[index].lightProbes[i].coefficients[j * 9 + k];
+                        sphericalHarmonics[j, k] = config.lightingScenariosData[index].lightProbes[i].coefficients[j * 9 + k];
                     }
                 }
 
@@ -203,27 +201,27 @@ namespace PixelWizards.LightmapSwitcher
 
         LightmapData[] LoadLightmaps(int index)
         {
-            if (lightingScenariosData[index].lightmaps == null
-                    || lightingScenariosData[index].lightmaps.Length == 0)
+            if (config.lightingScenariosData[index].lightmaps == null
+                    || config.lightingScenariosData[index].lightmaps.Length == 0)
             {
                 Debug.LogWarning("No lightmaps stored in scenario " + index);
                 return null;
             }
 
-            var newLightmaps = new LightmapData[lightingScenariosData[index].lightmaps.Length];
+            var newLightmaps = new LightmapData[config.lightingScenariosData[index].lightmaps.Length];
 
             for (int i = 0; i < newLightmaps.Length; i++)
             {
                 newLightmaps[i] = new LightmapData();
-                newLightmaps[i].lightmapColor = lightingScenariosData[index].lightmaps[i];
+                newLightmaps[i].lightmapColor = config.lightingScenariosData[index].lightmaps[i];
 
-                if (lightingScenariosData[index].lightmapsMode != LightmapsMode.NonDirectional)
+                if (config.lightingScenariosData[index].lightmapsMode != LightmapsMode.NonDirectional)
                 {
-                    newLightmaps[i].lightmapDir = lightingScenariosData[index].lightmapsDir[i];
+                    newLightmaps[i].lightmapDir = config.lightingScenariosData[index].lightmapsDir[i];
                 }
-                if (lightingScenariosData[index].shadowMasks.Length > 0)
+                if (config.lightingScenariosData[index].shadowMasks.Length > 0)
                 {
-                    newLightmaps[i].shadowMask = lightingScenariosData[index].shadowMasks[i];
+                    newLightmaps[i].shadowMask = config.lightingScenariosData[index].shadowMasks[i];
                 }
             }
 
@@ -277,9 +275,28 @@ namespace PixelWizards.LightmapSwitcher
             catch { Debug.LogWarning("Warning, error when trying to load lightprobes for scenario " + index); }
         }
 
+        /// <summary>
+        /// Deprecated - lighting data without knowing which scene it belongs to. 
+        /// 
+        /// Use StoreLightmapInfos(int index, string sceneName) instead!
+        /// </summary>
+        /// <param name="index"></param>
         public void StoreLightmapInfos(int index)
         {
+            Debug.LogWarning("Warning: Storing lightmap scenario without scene name? - use StoreLightmapInfos(int index, string sceneName) instead!");
+            StoreLightmapInfos(index, "unknown");
+        }
+
+        /// <summary>
+        /// Store the lightmap data into our config
+        /// </summary>
+        /// <param name="index">which index this lightmap data belongs to</param>
+        /// <param name="sceneName">which scene was used to generate the lighting data</param>
+        public void StoreLightmapInfos(int index, string sceneName)
+        {
             var newLightingScenarioData = new LightingScenarioData();
+            newLightingScenarioData.sceneName = sceneName;
+
             var newRendererInfos = new List<RendererInfo>();
             var newLightmapsTextures = new List<Texture2D>();
             var newLightmapsTexturesDir = new List<Texture2D>();
@@ -329,16 +346,16 @@ namespace PixelWizards.LightmapSwitcher
 
             newLightingScenarioData.lightProbes = newSphericalHarmonicsList.ToArray();
 
-            if (lightingScenariosData.Count < index + 1)
+            if (config.lightingScenariosData.Count < index + 1)
             {
-                lightingScenariosData.Insert(index, newLightingScenarioData);
+                config.lightingScenariosData.Insert(index, newLightingScenarioData);
             }
             else
             {
-                lightingScenariosData[index] = newLightingScenarioData;
+                config.lightingScenariosData[index] = newLightingScenarioData;
             }
 
-            lightingScenariosCount = lightingScenariosData.Count;
+            lightingScenariosCount = config.lightingScenariosData.Count;
 
             if (lightingScenesNames == null || lightingScenesNames.Length < lightingScenariosCount)
             {
